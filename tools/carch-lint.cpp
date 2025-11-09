@@ -89,7 +89,7 @@ private:
             }
             
             // Check field naming in structs
-            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def.get())) {
+            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def->type.get())) {
                 for (const auto& field : struct_type->fields) {
                     if (!is_snake_case(field->name)) {
                         add_warning(type_def->line, type_def->column,
@@ -106,7 +106,7 @@ private:
         
         for (const auto& type_def : schema->definitions) {
             // Check for overly complex structs
-            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def.get())) {
+            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def->type.get())) {
                 if (struct_type->fields.size() > 50) {
                     add_warning(type_def->line, type_def->column,
                         "Struct '" + type_def->name + "' has " + std::to_string(struct_type->fields.size()) +
@@ -116,7 +116,7 @@ private:
             }
             
             // Check for overly complex variants
-            if (auto* variant_type = dynamic_cast<carch::parser::VariantTypeNode*>(type_def.get())) {
+            if (auto* variant_type = dynamic_cast<carch::parser::VariantTypeNode*>(type_def->type.get())) {
                 if (variant_type->alternatives.size() > 20) {
                     add_warning(type_def->line, type_def->column,
                         "Variant '" + type_def->name + "' has " + std::to_string(variant_type->alternatives.size()) +
@@ -126,7 +126,7 @@ private:
             }
             
             // Check for overly large enums
-            if (auto* enum_type = dynamic_cast<carch::parser::EnumTypeNode*>(type_def.get())) {
+            if (auto* enum_type = dynamic_cast<carch::parser::EnumTypeNode*>(type_def->type.get())) {
                 if (enum_type->values.size() > 100) {
                     add_warning(type_def->line, type_def->column,
                         "Enum '" + type_def->name + "' has " + std::to_string(enum_type->values.size()) +
