@@ -1,0 +1,70 @@
+// Basic Carch IDL Examples
+// Demonstrating simple component definitions
+
+// Person component with id, name, and age
+Person : struct {
+    id: u64,
+    name: str,
+    age: u32
+}
+
+// Compact form (equivalent to above)
+PersonCompact : struct { id: u64, name: str, age: u32 }
+
+// Gender enumeration
+Gender : enum {
+    male,
+    female,
+    other
+}
+
+// Contact information using variant (OR logic)
+Contact : variant {
+    email: str,
+    phone: str,
+    address: struct {
+        street: str,
+        city: str,
+        postal_code: str,
+        country: str
+    }
+}
+
+// Position component with 3D coordinates
+Position : struct {
+    x: f32,
+    y: f32,
+    z: f32
+}
+
+// Velocity component
+Velocity : struct {
+    dx: f32,
+    dy: f32,
+    dz: f32
+}
+
+// Health component
+Health : struct {
+    current: u32,
+    max: u32
+}
+
+// Simple tag component (unit type in struct)
+Marker : struct {
+    tag: unit
+}
+
+// Rarity enum for items
+Rarity : enum {
+    common,
+    uncommon,
+    rare,
+    epic,
+    legendary
+}
+
+// Compact syntax examples
+Direction : enum { north, south, east, west }
+Team : enum { red, blue, green }
+State : variant { idle, running, jumping }

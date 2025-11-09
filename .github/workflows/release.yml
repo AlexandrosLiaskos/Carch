@@ -1,0 +1,207 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        # Generate changelog
+        if [ -z "$PREV_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+        else
+          CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+        fi
+        
+        # Save to file
+        echo "$CHANGELOG" > release_notes.txt
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref_name }}
+        body_path: release_notes.txt
+        draft: false
+        prerelease: true
+
+  build-linux:
+    name: Build Linux Release
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.20.x'
+    
+    - name: Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+        cmake --build build --config Release -j$(nproc)
+        strip build/carch
+    
+    - name: Package
+      run: |
+        mkdir -p carch-linux-x64
+        cp build/carch carch-linux-x64/
+        cp LICENSE carch-linux-x64/
+        cp README.md carch-linux-x64/
+        cp -r examples carch-linux-x64/
+        cp -r docs carch-linux-x64/
+        tar -czf carch-linux-x64.tar.gz carch-linux-x64
+        sha256sum carch-linux-x64.tar.gz > carch-linux-x64.tar.gz.sha256
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-linux-x64.tar.gz
+        asset_name: carch-linux-x64.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Checksum
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-linux-x64.tar.gz.sha256
+        asset_name: carch-linux-x64.tar.gz.sha256
+        asset_content_type: text/plain
+
+  build-windows:
+    name: Build Windows Release
+    needs: create-release
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.20.x'
+    
+    - name: Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+        cmake --build build --config Release
+    
+    - name: Package
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Path carch-windows-x64
+        Copy-Item build\Release\carch.exe carch-windows-x64\
+        Copy-Item LICENSE carch-windows-x64\
+        Copy-Item README.md carch-windows-x64\
+        Copy-Item -Recurse examples carch-windows-x64\
+        Copy-Item -Recurse docs carch-windows-x64\
+        Compress-Archive -Path carch-windows-x64 -DestinationPath carch-windows-x64.zip
+        (Get-FileHash carch-windows-x64.zip -Algorithm SHA256).Hash | Out-File carch-windows-x64.zip.sha256
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-windows-x64.zip
+        asset_name: carch-windows-x64.zip
+        asset_content_type: application/zip
+    
+    - name: Upload Checksum
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-windows-x64.zip.sha256
+        asset_name: carch-windows-x64.zip.sha256
+        asset_content_type: text/plain
+
+  build-macos:
+    name: Build macOS Release
+    needs: create-release
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.20.x'
+    
+    - name: Build
+      run: |
+        if [ "${{ matrix.arch }}" == "arm64" ]; then
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_OSX_ARCHITECTURES=arm64
+        else
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_OSX_ARCHITECTURES=x86_64
+        fi
+        cmake --build build --config Release -j$(sysctl -n hw.ncpu)
+        strip build/carch
+    
+    - name: Package
+      run: |
+        mkdir -p carch-macos-${{ matrix.arch }}
+        cp build/carch carch-macos-${{ matrix.arch }}/
+        cp LICENSE carch-macos-${{ matrix.arch }}/
+        cp README.md carch-macos-${{ matrix.arch }}/
+        cp -r examples carch-macos-${{ matrix.arch }}/
+        cp -r docs carch-macos-${{ matrix.arch }}/
+        tar -czf carch-macos-${{ matrix.arch }}.tar.gz carch-macos-${{ matrix.arch }}
+        shasum -a 256 carch-macos-${{ matrix.arch }}.tar.gz > carch-macos-${{ matrix.arch }}.tar.gz.sha256
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-macos-${{ matrix.arch }}.tar.gz
+        asset_name: carch-macos-${{ matrix.arch }}.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Checksum
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./carch-macos-${{ matrix.arch }}.tar.gz.sha256
+        asset_name: carch-macos-${{ matrix.arch }}.tar.gz.sha256
+        asset_content_type: text/plain

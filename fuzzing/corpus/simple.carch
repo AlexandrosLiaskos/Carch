@@ -1,0 +1,4 @@
+Position : struct { x: f32, y: f32, z: f32 }
+Health : struct { current: u32, max: u32 }
+State : variant { idle, running, jumping }
+Team : enum { red, blue }

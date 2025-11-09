@@ -1,0 +1,257 @@
+// Advanced Carch IDL Examples
+// Showcasing all features and edge cases
+
+// All primitive types demonstration
+AllPrimitives : struct {
+    // Strings
+    text: str,
+    
+    // Signed integers
+    tiny_int: i8,
+    small_int: i16,
+    medium_int: i32,
+    large_int: i64,
+    default_int: int,
+    
+    // Unsigned integers
+    byte: u8,
+    word: u16,
+    double_word: u32,
+    quad_word: u64,
+    
+    // Floating point
+    single_precision: f32,
+    double_precision: f64,
+    
+    // Boolean
+    flag: bool,
+    
+    // Unit (empty type)
+    marker: unit
+}
+
+// All container types
+AllContainers : struct {
+    // Arrays
+    simple_array: array<u32>,
+    struct_array: array<struct { x: f32, y: f32 }>,
+    nested_array: array<array<u32>>,
+    
+    // Maps
+    simple_map: map<str, u32>,
+    complex_map: map<u64, struct { name: str, value: f32 }>,
+    nested_map: map<str, map<str, u32>>,
+    
+    // Optionals
+    maybe_string: optional<str>,
+    maybe_struct: optional<struct { id: u64, name: str }>,
+    maybe_array: optional<array<u32>>
+}
+
+// Entity references and relationships
+SceneGraph : struct {
+    entity_id: u64,
+    parent: optional<ref<entity>>,
+    children: array<ref<entity>>,
+    siblings: array<ref<entity>>,
+    transform: struct {
+        local: struct { x: f32, y: f32, z: f32 },
+        world: struct { x: f32, y: f32, z: f32 }
+    }
+}
+
+// Deep nesting (4+ levels)
+DeeplyNested : struct {
+    level1: struct {
+        level2: struct {
+            level3: struct {
+                level4: struct {
+                    level5: struct {
+                        value: u32
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Complex variant with many alternatives
+SpellEffect : variant {
+    damage: struct {
+        amount: u32,
+        element: enum { fire, ice, lightning, poison, arcane },
+        area_of_effect: optional<struct { radius: f32, center: struct { x: f32, y: f32 } }>
+    },
+    heal: struct {
+        amount: u32,
+        over_time: optional<struct { duration: f32, tick_rate: f32 }>,
+        targets: variant {
+            single: ref<entity>,
+            area: struct { radius: f32, max_targets: u32 },
+            all_allies: unit
+        }
+    },
+    buff: struct {
+        stat: enum { strength, agility, intelligence, armor, speed },
+        modifier: f32,
+        duration: f32,
+        stacks: bool
+    },
+    debuff: struct {
+        effect: enum { stun, slow, silence, blind, root },
+        duration: f32,
+        intensity: f32
+    },
+    summon: struct {
+        creature_id: u32,
+        duration: optional<f32>,
+        count: u32,
+        position: struct { x: f32, y: f32, z: f32 }
+    },
+    teleport: struct {
+        destination: struct { x: f32, y: f32, z: f32 },
+        instant: bool
+    }
+}
+
+// Quest system with complex structure
+Quest : struct {
+    id: u32,
+    title: str,
+    description: str,
+    requirements: struct {
+        min_level: u32,
+        prerequisite_quests: array<u32>,
+        items_needed: array<struct { item_id: u32, quantity: u32 }>
+    },
+    objectives: array<variant {
+        kill: struct {
+            target_type: str,
+            count: u32,
+            location: optional<struct { x: f32, y: f32, radius: f32 }>
+        },
+        collect: struct {
+            item_id: u32,
+            quantity: u32,
+            quality: optional<enum { poor, normal, rare, epic }>
+        },
+        reach: struct {
+            location: struct { x: f32, y: f32, z: f32 },
+            radius: f32
+        },
+        talk: struct {
+            npc_id: u64
+        }
+    }>,
+    rewards: struct {
+        experience: u64,
+        gold: u64,
+        items: array<struct { item_id: u32, quantity: u32 }>,
+        unlocks: array<u32>
+    }
+}
+
+// Mixed compact and expanded syntax
+MixedSyntax : struct {
+    compact_field: struct { x: f32, y: f32 },
+    expanded_field: struct {
+        nested: struct {
+            deep: u32
+        }
+    },
+    inline_variant: variant { a: u32, b: str, c: unit },
+    expanded_variant: variant {
+        option1: struct { value: u32 },
+        option2: struct {
+            complex: array<u32>
+        }
+    }
+}
+
+// Arrays of variants
+AnimationSystem : struct {
+    animations: array<variant {
+        transform: struct {
+            target: ref<entity>,
+            from: struct { x: f32, y: f32, z: f32 },
+            to: struct { x: f32, y: f32, z: f32 },
+            duration: f32
+        },
+        color: struct {
+            from: struct { r: f32, g: f32, b: f32, a: f32 },
+            to: struct { r: f32, g: f32, b: f32, a: f32 },
+            duration: f32
+        },
+        scale: struct {
+            from: f32,
+            to: f32,
+            duration: f32
+        }
+    }>
+}
+
+// Optional nested structures
+Configuration : struct {
+    graphics: optional<struct {
+        resolution: struct { width: u32, height: u32 },
+        fullscreen: bool,
+        vsync: bool,
+        quality: enum { low, medium, high, ultra }
+    }>,
+    audio: optional<struct {
+        master_volume: f32,
+        music_volume: f32,
+        effects_volume: f32,
+        muted: bool
+    }>,
+    controls: optional<map<str, u32>>
+}
+
+// Complex map structures
+Database : struct {
+    entities: map<u64, variant {
+        player: struct { name: str, level: u32 },
+        enemy: struct { type: str, health: u32 },
+        item: struct { name: str, rarity: enum { common, rare, epic } }
+    }>,
+    metadata: map<str, variant {
+        integer: i64,
+        float: f64,
+        string: str,
+        boolean: bool,
+        array: array<str>
+    }>
+}
+
+// Circular references via entity refs (legal because ref breaks cycle)
+Tree : struct {
+    value: u32,
+    parent: optional<ref<entity>>,
+    children: array<ref<entity>>
+}
+
+// State machine with nested states
+GameState : variant {
+    menu: struct {
+        selected_option: u32,
+        substate: variant {
+            main_menu,
+            options,
+            credits
+        }
+    },
+    playing: struct {
+        paused: bool,
+        game_mode: enum { adventure, survival, creative },
+        difficulty: enum { easy, normal, hard, extreme }
+    },
+    loading: struct {
+        progress: f32,
+        stage: str
+    },
+    game_over: struct {
+        score: u64,
+        time_played: f32,
+        achievements: array<u32>
+    }
+}

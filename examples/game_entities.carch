@@ -1,0 +1,182 @@
+// Game Entity Examples
+// Demonstrating complex ECS patterns for game development
+
+// Transform component (position, rotation, scale)
+Transform : struct {
+    position: struct { x: f32, y: f32, z: f32 },
+    rotation: struct { x: f32, y: f32, z: f32, w: f32 },
+    scale: struct { x: f32, y: f32, z: f32 }
+}
+
+// Health with regeneration
+Health : struct {
+    current: u32,
+    max: u32,
+    regeneration_rate: f32
+}
+
+// Inventory system with items
+Inventory : struct {
+    items: array<struct {
+        item_id: u32,
+        quantity: u32,
+        slot: u32
+    }>,
+    capacity: u32,
+    gold: u64
+}
+
+// Weapon variants (different weapon types)
+Weapon : variant {
+    sword: struct {
+        damage: u32,
+        durability: u32,
+        sharpness: f32,
+        enchantment: optional<str>
+    },
+    bow: struct {
+        damage: u32,
+        range: f32,
+        arrow_count: u32,
+        draw_speed: f32
+    },
+    staff: struct {
+        magic_power: u32,
+        mana_cost: u32,
+        element: enum { fire, ice, lightning, arcane }
+    },
+    unarmed: unit
+}
+
+// AI state machine
+AIState : variant {
+    idle: unit,
+    patrol: struct {
+        waypoints: array<struct { x: f32, y: f32 }>,
+        current_index: u32,
+        speed: f32
+    },
+    chase: struct {
+        target: ref<entity>,
+        speed_multiplier: f32,
+        aggro_range: f32
+    },
+    attack: struct {
+        target: ref<entity>,
+        cooldown: f32,
+        damage: u32
+    },
+    flee: struct {
+        danger_source: ref<entity>,
+        flee_distance: f32
+    }
+}
+
+// Team/faction
+Team : enum {
+    player,
+    enemy,
+    neutral,
+    ally
+}
+
+// Complete Player Entity (deep nesting - 3+ levels)
+Player : struct {
+    // Core identity (level 1)
+    core: struct {
+        id: u64,
+        name: str,
+        level: u32,
+        experience: u64
+    },
+    
+    // Spatial data (level 1)
+    spatial: struct {
+        transform: Transform,
+        velocity: struct { x: f32, y: f32, z: f32 }
+    },
+    
+    // Combat attributes (level 1)
+    combat: struct {
+        health: Health,
+        mana: struct { current: u32, max: u32 },
+        stamina: struct { current: u32, max: u32 },
+        stats: struct {
+            strength: u32,
+            agility: u32,
+            intelligence: u32,
+            vitality: u32
+        }
+    },
+    
+    // Equipment (level 1)
+    equipment: struct {
+        weapon: optional<Weapon>,
+        armor: optional<u32>,
+        accessories: array<u32>
+    },
+    
+    // Inventory (level 1)
+    inventory: Inventory,
+    
+    // Social (level 1)
+    social: struct {
+        guild: optional<u64>,
+        party: optional<array<ref<entity>>>,
+        friends: array<ref<entity>>
+    },
+    
+    // Current state (level 1)
+    state: variant {
+        idle,
+        moving: struct { speed: f32 },
+        combat: struct { target: ref<entity> },
+        crafting: struct { recipe_id: u32 },
+        dead: struct { respawn_timer: f32 }
+    }
+}
+
+// Enemy entity
+Enemy : struct {
+    id: u64,
+    type: str,
+    transform: Transform,
+    health: Health,
+    ai: AIState,
+    team: Team,
+    loot_table: array<struct {
+        item_id: u32,
+        drop_chance: f32,
+        quantity_min: u32,
+        quantity_max: u32
+    }>
+}
+
+// Projectile entity
+Projectile : struct {
+    id: u64,
+    owner: ref<entity>,
+    transform: Transform,
+    velocity: f32,
+    lifetime: f32,
+    damage: struct {
+        amount: u32,
+        type: enum { physical, magical, fire, ice, lightning },
+        pierce: bool
+    }
+}
+
+// NPC with dialogue
+NPC : struct {
+    id: u64,
+    name: str,
+    transform: Transform,
+    dialogue: struct {
+        greeting: str,
+        quests: array<u32>,
+        merchant: optional<struct {
+            items_for_sale: array<u32>,
+            gold: u64
+        }>
+    }
+}

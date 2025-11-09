@@ -1,0 +1,80 @@
+// Simple 2D Game Component Schema
+
+// Transform component
+Transform : struct {
+    position: struct { x: f32, y: f32 },
+    rotation: f32,
+    scale: struct { x: f32, y: f32 }
+}
+
+// Sprite rendering
+Sprite : struct {
+    texture_id: u32,
+    layer: i32,
+    color: struct { r: f32, g: f32, b: f32, a: f32 }
+}
+
+// Physics body
+RigidBody : struct {
+    velocity: struct { x: f32, y: f32 },
+    mass: f32,
+    friction: f32
+}
+
+// Collider variants
+Collider : variant {
+    circle: struct { radius: f32 },
+    box: struct { width: f32, height: f32 },
+    polygon: struct { vertices: array<struct { x: f32, y: f32 }> }
+}
+
+// Health component
+Health : struct {
+    current: u32,
+    max: u32,
+    regeneration: f32
+}
+
+// Player component
+Player : struct {
+    input_state: struct {
+        move_x: f32,
+        move_y: f32,
+        jump_pressed: bool,
+        attack_pressed: bool
+    },
+    score: u64
+}
+
+// Enemy AI states
+AIState : variant {
+    idle: unit,
+    patrol: struct {
+        waypoints: array<struct { x: f32, y: f32 }>,
+        current_index: u32
+    },
+    chase: struct { target: ref<entity> },
+    attack: struct { target: ref<entity>, cooldown: f32 }
+}
+
+// Enemy component
+Enemy : struct {
+    ai_state: AIState,
+    patrol_points: array<struct { x: f32, y: f32 }>,
+    detection_radius: f32
+}
+
+// Projectile component
+Projectile : struct {
+    damage: u32,
+    lifetime: f32,
+    owner: ref<entity>
+}
+
+// PowerUp variants
+PowerUp : variant {
+    health: struct { amount: u32 },
+    speed: struct { multiplier: f32, duration: f32 },
+    invincibility: struct { duration: f32 },
+    extra_life: unit
+}

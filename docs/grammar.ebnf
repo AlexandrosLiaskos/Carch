@@ -1,0 +1,133 @@
+(* Carch IDL Grammar - EBNF Notation *)
+
+(* ===== Top Level ===== *)
+
+schema = { type_definition } ;
+
+type_definition = identifier ":" type_expr ;
+
+(* ===== Type Expressions ===== *)
+
+type_expr = struct_type
+          | variant_type
+          | enum_type
+          | primitive_type
+          | container_type
+          | ref_type
+          | identifier ;
+
+(* ===== Composite Types ===== *)
+
+struct_type = "struct" "{" [ field_list ] "}" ;
+
+field_list = field { "," field } [ "," ] ;
+
+field = identifier ":" type_expr ;
+
+variant_type = "variant" "{" [ alternative_list ] "}" ;
+
+alternative_list = alternative { "," alternative } [ "," ] ;
+
+alternative = identifier [ ":" type_expr ] ;
+
+enum_type = "enum" "{" [ enum_value_list ] "}" ;
+
+enum_value_list = identifier { "," identifier } [ "," ] ;
+
+(* ===== Primitive Types ===== *)
+
+primitive_type = "str"
+               | "int"
+               | "u8" | "u16" | "u32" | "u64"
+               | "i8" | "i16" | "i32" | "i64"
+               | "f32" | "f64"
+               | "bool"
+               | "unit" ;
+
+(* ===== Container Types ===== *)
+
+container_type = array_type
+               | map_type
+               | optional_type ;
+
+array_type = "array" "<" type_expr ">" ;
+
+map_type = "map" "<" type_expr "," type_expr ">" ;
+
+optional_type = "optional" "<" type_expr ">" ;
+
+(* ===== Reference Types ===== *)
+
+ref_type = "ref" "<" "entity" ">" ;
+
+(* ===== Lexical Elements ===== *)
+
+identifier = letter { letter | digit | "_" } ;
+
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
+       | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
+       | "U" | "V" | "W" | "X" | "Y" | "Z"
+       | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+       | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+       | "u" | "v" | "w" | "x" | "y" | "z" ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+(* ===== Literals ===== *)
+
+integer_literal = [ "-" ] digit { digit }
+                | "0x" hex_digit { hex_digit }
+                | "0b" binary_digit { binary_digit }
+                | "0o" octal_digit { octal_digit } ;
+
+hex_digit = digit | "a" | "b" | "c" | "d" | "e" | "f"
+                  | "A" | "B" | "C" | "D" | "E" | "F" ;
+
+binary_digit = "0" | "1" ;
+
+octal_digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
+
+float_literal = [ "-" ] digit { digit } "." { digit } [ exponent ]
+              | [ "-" ] digit { digit } exponent ;
+
+exponent = ( "e" | "E" ) [ "+" | "-" ] digit { digit } ;
+
+string_literal = '"' { string_char } '"' ;
+
+string_char = any_char_except_quote_or_backslash
+            | escape_sequence ;
+
+escape_sequence = "\\" ( "n" | "t" | "r" | "\\" | '"' | "'" | "0" )
+                | "\\x" hex_digit hex_digit
+                | "\\u" hex_digit hex_digit hex_digit hex_digit ;
+
+boolean_literal = "true" | "false" ;
+
+(* ===== Comments and Whitespace ===== *)
+
+comment = line_comment | block_comment ;
+
+line_comment = "//" { any_char_except_newline } newline ;
+
+block_comment = "/*" { any_char } "*/" ;
+
+whitespace = " " | "\t" | "\r" | "\n" ;
+
+(* ===== Symbols ===== *)
+
+(* Single-character symbols *)
+(* : , { } < > ( ) *)
+
+(* Multi-character symbols *)
+(* None currently defined *)
+
+(* ===== Notes ===== *)
+
+(*
+  - Whitespace and comments are ignored except as token separators
+  - Trailing commas in field_list, alternative_list, and enum_value_list are optional
+  - Both compact (single-line) and expanded (multi-line) syntax are supported
+  - Alternative types in variants default to 'unit' if not specified
+  - Identifiers are case-sensitive
+  - Type names and field names share the same identifier namespace within a scope
+*)
