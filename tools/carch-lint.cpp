@@ -75,10 +75,10 @@ private:
         return true;
     }
     
-    void check_naming_conventions(carch::parser::Schema* schema) {
+    void check_naming_conventions(carch::parser::SchemaNode* schema) {
         if (!schema) return;
         
-        for (const auto& type_def : schema->type_definitions) {
+        for (const auto& type_def : schema->definitions) {
             const std::string& type_name = type_def->name;
             
             // Type names should be PascalCase
@@ -89,11 +89,11 @@ private:
             }
             
             // Check field naming in structs
-            if (auto* struct_type = dynamic_cast<carch::parser::StructType*>(type_def->type.get())) {
+            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def.get())) {
                 for (const auto& field : struct_type->fields) {
-                    if (!is_snake_case(field.name)) {
+                    if (!is_snake_case(field->name)) {
                         add_warning(type_def->line, type_def->column,
-                            "Field name '" + field.name + "' should be snake_case",
+                            "Field name '" + field->name + "' should be snake_case",
                             "naming-convention");
                     }
                 }
@@ -101,12 +101,12 @@ private:
         }
     }
     
-    void check_complexity(carch::parser::Schema* schema) {
+    void check_complexity(carch::parser::SchemaNode* schema) {
         if (!schema) return;
         
-        for (const auto& type_def : schema->type_definitions) {
+        for (const auto& type_def : schema->definitions) {
             // Check for overly complex structs
-            if (auto* struct_type = dynamic_cast<carch::parser::StructType*>(type_def->type.get())) {
+            if (auto* struct_type = dynamic_cast<carch::parser::StructTypeNode*>(type_def.get())) {
                 if (struct_type->fields.size() > 50) {
                     add_warning(type_def->line, type_def->column,
                         "Struct '" + type_def->name + "' has " + std::to_string(struct_type->fields.size()) +
@@ -116,7 +116,7 @@ private:
             }
             
             // Check for overly complex variants
-            if (auto* variant_type = dynamic_cast<carch::parser::VariantType*>(type_def->type.get())) {
+            if (auto* variant_type = dynamic_cast<carch::parser::VariantTypeNode*>(type_def.get())) {
                 if (variant_type->alternatives.size() > 20) {
                     add_warning(type_def->line, type_def->column,
                         "Variant '" + type_def->name + "' has " + std::to_string(variant_type->alternatives.size()) +
@@ -126,7 +126,7 @@ private:
             }
             
             // Check for overly large enums
-            if (auto* enum_type = dynamic_cast<carch::parser::EnumType*>(type_def->type.get())) {
+            if (auto* enum_type = dynamic_cast<carch::parser::EnumTypeNode*>(type_def.get())) {
                 if (enum_type->values.size() > 100) {
                     add_warning(type_def->line, type_def->column,
                         "Enum '" + type_def->name + "' has " + std::to_string(enum_type->values.size()) +
@@ -137,7 +137,7 @@ private:
         }
     }
     
-    void check_best_practices(carch::parser::Schema* schema) {
+    void check_best_practices(carch::parser::SchemaNode* schema) {
         if (!schema) return;
         
         // Check for unused types (types that are never referenced)
