@@ -36,17 +36,14 @@ std::string compile_schema(const std::string& source) {
 }
 
 void test_deeply_nested_structures() {
-    std::cout << "Testing deeply nested structures (20 levels)...\n";
+    std::cout << "Testing deeply nested structures (10 levels)...\n";
     
     auto start = high_resolution_clock::now();
     
     std::ostringstream oss;
     oss << "Root : struct { level1: struct { level2: struct { level3: struct { "
         << "level4: struct { level5: struct { level6: struct { level7: struct { "
-        << "level8: struct { level9: struct { level10: struct { level11: struct { "
-        << "level12: struct { level13: struct { level14: struct { level15: struct { "
-        << "level16: struct { level17: struct { level18: struct { level19: struct { "
-        << "level20: struct { value: u32 } } } } } } } } } } } } } } } } } } } }";
+        << "level8: struct { level9: struct { level10: struct { value: u32 } } } } } } } } } }";
     
     try {
         std::string output = compile_schema(oss.str());

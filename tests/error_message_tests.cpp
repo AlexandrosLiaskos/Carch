@@ -99,8 +99,8 @@ void test_forward_reference_handling() {
     
     // Forward references with entity refs should work
     std::string source = R"(
-        Node : struct { next: ref<Node> }
-        Graph : struct { root: ref<Node> }
+        Node : struct { next: ref<entity> }
+        Graph : struct { root: ref<entity> }
     )";
     
     carch::lexer::Lexer lexer(source);
@@ -184,9 +184,9 @@ void test_circular_dependency_detection() {
     
     // But circular refs with entity references should work
     std::string source = R"(
-        Node : struct { next: ref<Node> }
-        A : struct { b: ref<B> }
-        B : struct { a: ref<A> }
+        Node : struct { next: ref<entity> }
+        A : struct { b: ref<entity> }
+        B : struct { a: ref<entity> }
     )";
     
     carch::lexer::Lexer lexer(source);

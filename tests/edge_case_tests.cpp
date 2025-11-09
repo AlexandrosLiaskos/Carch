@@ -172,8 +172,8 @@ void test_ref_in_containers() {
     
     std::string source = R"(
         Container : struct {
-            refs: array<ref<Entity>>,
-            opt_ref: optional<ref<Entity>>
+            refs: array<ref<entity>>,
+            opt_ref: optional<ref<entity>>
         }
         Entity : struct { id: u64 }
     )";
