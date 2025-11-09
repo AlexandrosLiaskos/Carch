@@ -55,7 +55,7 @@ jobs:
     
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-linux-${{ matrix.compiler }}
         path: build/Testing/Temporary/LastTest.log
@@ -85,7 +85,7 @@ jobs:
     
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-windows
         path: build/Testing/Temporary/LastTest.log
@@ -115,7 +115,7 @@ jobs:
     
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-macos
         path: build/Testing/Temporary/LastTest.log
