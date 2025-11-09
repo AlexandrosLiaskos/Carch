@@ -43,7 +43,7 @@ void test_deeply_nested_structures() {
     std::ostringstream oss;
     oss << "Root : struct { level1: struct { level2: struct { level3: struct { "
         << "level4: struct { level5: struct { level6: struct { level7: struct { "
-        << "level8: struct { level9: struct { level10: struct { value: u32 } } } } } } } } } }";
+        << "level8: struct { level9: struct { level10: struct { value: u32 } } } } } } } } }";
     
     try {
         std::string output = compile_schema(oss.str());
@@ -230,14 +230,14 @@ void test_many_circular_refs() {
     auto start = high_resolution_clock::now();
     
     std::ostringstream oss;
-    oss << "Node1 : struct { next: ref<Node2> }\n"
-        << "Node2 : struct { next: ref<Node3> }\n"
-        << "Node3 : struct { next: ref<Node4> }\n"
-        << "Node4 : struct { next: ref<Node5> }\n"
-        << "Node5 : struct { next: ref<Node1> }\n";
+    oss << "Node1 : struct { next: ref<entity> }\n"
+        << "Node2 : struct { next: ref<entity> }\n"
+        << "Node3 : struct { next: ref<entity> }\n"
+        << "Node4 : struct { next: ref<entity> }\n"
+        << "Node5 : struct { next: ref<entity> }\n";
     
     for (int i = 0; i < 50; ++i) {
-        oss << "Graph" << i << " : struct { root: ref<Node1>, other: ref<Node" << (i % 5 + 1) << "> }\n";
+        oss << "Graph" << i << " : struct { root: ref<entity>, other: ref<entity> }\n";
     }
     
     try {

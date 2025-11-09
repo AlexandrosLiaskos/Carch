@@ -227,8 +227,8 @@ void benchmark_end_to_end() {
         AIState : variant {
             idle: unit,
             patrol: struct { waypoints: array<Transform> },
-            chase: struct { target: ref<Entity> },
-            attack: struct { target: ref<Entity> }
+            chase: struct { target: ref<entity> },
+            attack: struct { target: ref<entity> }
         }
         
         Team : enum { player, enemy, neutral }
