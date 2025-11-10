@@ -74,29 +74,6 @@ Contact contact = Contact_Email{std::string("alice@example.com")};
 // Contact contact{std::in_place_type<Contact_Email>, "alice@example.com"};
 ```
 
-## Troubleshooting CI Failures
-
-### How to view CI logs
-- Navigate to GitHub Actions tab
-- Click on failed workflow run
-- Expand test steps to see detailed output
-
-### Common CI failure causes
-- Uncommitted/unpushed changes
-- Branch mismatch (CI running on different branch)
-- Cache issues (solution: re-run workflow)
-- Test syntax errors (check for typed entity references)
-- Compiler implementation bugs
-
-### How to reproduce CI failures locally
-- Use exact same CMake flags as CI: `-DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=OFF`
-- Run tests with: `ctest --output-on-failure --verbose`
-- Check which tests are registered: `ctest -N`
-
-### Entity reference syntax reminder
-- Always use `ref<entity>`, never `ref<TypeName>`
-- This applies to all test code, example files, and dynamically generated test strings
-
 ## Core Concepts
 
 ### Struct (AND Logic)
