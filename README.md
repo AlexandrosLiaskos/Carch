@@ -6,8 +6,10 @@
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey.svg)](https://github.com/AlexandrosLiaskos/Carch)
 
 <div align="center">
-<img width="400" alt="Carch Logo" src="https://github.com/user-attachments/assets/244613d1-a7cb-474f-9dc9-06a401387996" />
+<img width="400" alt="Carch Logo" src="https://github.com/user-attachments/assets/516b48c7-49a1-45b8-8817-c705e0f3c270" />
 </div>
+
+
 
 **Carch** (Component Architecture) is an Interface Definition Language designed specifically for defining Entity-Component System (ECS) architectures in C++. It provides a clean, expressive syntax for declaring component schemas with strong type safety and algebraic data types.
 
