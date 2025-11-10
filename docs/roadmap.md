@@ -18,8 +18,7 @@ This is the initial public release for community feedback and testing.
 - ✓ CLI tool with options
 - ✓ Comprehensive test suite
 - ✓ Documentation and examples
-- ✓ GitHub Actions CI/CD
-
+- 
 ## Version 1.0 (Planned)
 
 **Target**: Q2 2026
