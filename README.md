@@ -1,6 +1,5 @@
 # Carch IDL
 
-[![CI Build Status](https://github.com/AlexandrosLiaskos/Carch/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexandrosLiaskos/Carch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/AlexandrosLiaskos/Carch/blob/main/LICENSE)
 [![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://github.com/AlexandrosLiaskos/Carch/releases)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey.svg)](https://github.com/AlexandrosLiaskos/Carch)
