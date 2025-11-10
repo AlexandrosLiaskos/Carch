@@ -170,7 +170,7 @@ void benchmark_semantic_analysis() {
     std::ostringstream refs;
     for (int i = 0; i < 100; ++i) {
         int next = (i + 1) % 100;
-        refs << "Node" << i << " : struct { next: ref<Node" << next << "> }\n";
+        refs << "Node" << i << " : struct { next: ref<entity> }\n";
     }
     auto result3 = benchmark_operation("Semantic - 100 circular refs", refs.str(), run_semantic);
     print_result(result3);

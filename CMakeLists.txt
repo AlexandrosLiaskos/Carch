@@ -15,6 +15,9 @@ option(BUILD_TOOLS "Build additional tools (linter, formatter, validator)" ON)
 option(BUILD_FUZZING "Build fuzzing targets" OFF)
 option(UPDATE_GOLDEN_FILES "Update golden test files" OFF)
 option(ENABLE_WERROR "Treat warnings as errors" OFF)
+option(ENABLE_STRESS_TESTS "Enable stress tests" ON)
+option(ENABLE_EDGE_CASE_TESTS "Enable edge case tests" ON)
+option(ENABLE_ERROR_MESSAGE_TESTS "Enable error message tests" ON)
 
 # Compiler flags
 if(MSVC)
@@ -108,19 +111,25 @@ if(BUILD_TESTS)
     add_test(NAME example_compilation_tests COMMAND example_compilation_tests)
     
     # Stress tests
-    add_executable(stress_tests tests/stress_tests.cpp)
-    target_link_libraries(stress_tests PRIVATE carch_lib)
-    add_test(NAME stress_tests COMMAND stress_tests)
+    if(ENABLE_STRESS_TESTS)
+        add_executable(stress_tests tests/stress_tests.cpp)
+        target_link_libraries(stress_tests PRIVATE carch_lib)
+        add_test(NAME stress_tests COMMAND stress_tests)
+    endif()
     
     # Edge case tests
-    add_executable(edge_case_tests tests/edge_case_tests.cpp)
-    target_link_libraries(edge_case_tests PRIVATE carch_lib)
-    add_test(NAME edge_case_tests COMMAND edge_case_tests)
+    if(ENABLE_EDGE_CASE_TESTS)
+        add_executable(edge_case_tests tests/edge_case_tests.cpp)
+        target_link_libraries(edge_case_tests PRIVATE carch_lib)
+        add_test(NAME edge_case_tests COMMAND edge_case_tests)
+    endif()
     
     # Error message tests
-    add_executable(error_message_tests tests/error_message_tests.cpp)
-    target_link_libraries(error_message_tests PRIVATE carch_lib)
-    add_test(NAME error_message_tests COMMAND error_message_tests)
+    if(ENABLE_ERROR_MESSAGE_TESTS)
+        add_executable(error_message_tests tests/error_message_tests.cpp)
+        target_link_libraries(error_message_tests PRIVATE carch_lib)
+        add_test(NAME error_message_tests COMMAND error_message_tests)
+    endif()
     
     # Golden file tests
     add_executable(golden_file_tests tests/golden_file_tests.cpp)
@@ -139,11 +148,19 @@ if(BUILD_TESTS)
     endif()
     
     # Custom target to run all tests
+    set(TEST_TARGETS lexer_tests parser_tests semantic_tests codegen_tests integration_tests example_compilation_tests golden_file_tests)
+    if(ENABLE_STRESS_TESTS)
+        list(APPEND TEST_TARGETS stress_tests)
+    endif()
+    if(ENABLE_EDGE_CASE_TESTS)
+        list(APPEND TEST_TARGETS edge_case_tests)
+    endif()
+    if(ENABLE_ERROR_MESSAGE_TESTS)
+        list(APPEND TEST_TARGETS error_message_tests)
+    endif()
     add_custom_target(test_all
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-        DEPENDS lexer_tests parser_tests semantic_tests codegen_tests 
-                integration_tests example_compilation_tests stress_tests 
-                edge_case_tests error_message_tests golden_file_tests
+        DEPENDS ${TEST_TARGETS}
         COMMENT "Running all test suites"
     )
     

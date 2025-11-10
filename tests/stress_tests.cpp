@@ -1,6 +1,3 @@
-// Stress Tests
-// Tests compiler robustness under extreme conditions
-
 #include "../src/lexer/lexer.h"
 #include "../src/parser/parser.h"
 #include "../src/semantic/type_checker.h"
@@ -19,11 +16,21 @@ std::string compile_schema(const std::string& source) {
     auto schema = parser.parse();
     
     if (parser.has_errors()) {
+        std::cerr << "Parser errors:\n";
+        for (const auto& err : parser.errors()) {
+            std::cerr << "  " << err << "\n";
+        }
+        std::cerr << "Source that failed to parse:\n" << source << "\n";
         throw std::runtime_error("Parser errors");
     }
     
     carch::semantic::TypeChecker checker(schema.get());
     if (!checker.check()) {
+        std::cerr << "Semantic errors:\n";
+        for (const auto& err : checker.errors()) {
+            std::cerr << "  " << err << "\n";
+        }
+        std::cerr << "Source that failed semantic check:\n" << source << "\n";
         throw std::runtime_error("Semantic errors");
     }
     
@@ -44,6 +51,8 @@ void test_deeply_nested_structures() {
     oss << "Root : struct { level1: struct { level2: struct { level3: struct { "
         << "level4: struct { level5: struct { level6: struct { level7: struct { "
         << "level8: struct { level9: struct { level10: struct { value: u32 } } } } } } } } }";
+    
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
     
     try {
         std::string output = compile_schema(oss.str());
@@ -69,6 +78,8 @@ void test_large_schema() {
     for (int i = 0; i < 1000; ++i) {
         oss << "Type" << i << " : struct { field_a: u32, field_b: f32, field_c: str }\n";
     }
+    
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
     
     try {
         std::string output = compile_schema(oss.str());
@@ -99,6 +110,8 @@ void test_wide_struct() {
     }
     oss << "}";
     
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
+    
     try {
         std::string output = compile_schema(oss.str());
         assert(!output.empty());
@@ -128,6 +141,8 @@ void test_wide_variant() {
     }
     oss << "}";
     
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
+    
     try {
         std::string output = compile_schema(oss.str());
         assert(!output.empty());
@@ -156,6 +171,8 @@ void test_wide_enum() {
     }
     oss << "}";
     
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
+    
     try {
         std::string output = compile_schema(oss.str());
         assert(!output.empty());
@@ -180,6 +197,8 @@ void test_long_identifiers() {
     std::string long_name(500, 'a');
     std::ostringstream oss;
     oss << long_name << " : struct { " << long_name << "_field: u32 }";
+    
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
     
     try {
         std::string output = compile_schema(oss.str());
@@ -206,6 +225,8 @@ void test_complex_container_nesting() {
         << "inner: map<str, array<optional<u32>>> "
         << "}>>>>"
         << " }";
+    
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
     
     try {
         std::string output = compile_schema(oss.str());
@@ -240,6 +261,8 @@ void test_many_circular_refs() {
         oss << "Graph" << i << " : struct { root: ref<entity>, other: ref<entity> }\n";
     }
     
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
+    
     try {
         std::string output = compile_schema(oss.str());
         assert(!output.empty());
@@ -269,6 +292,8 @@ void test_large_file_parsing() {
         }
         oss << "}\n\n";
     }
+    
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
     
     try {
         std::string source = oss.str();
@@ -302,6 +327,8 @@ void test_unicode_identifiers() {
         << "  score: u32\n"
         << "}";
     
+    std::cout << "  Generated schema preview: " << oss.str().substr(0, 200) << "...\n";
+    
     try {
         std::string output = compile_schema(oss.str());
         assert(!output.empty());
@@ -320,20 +347,78 @@ int main() {
     std::cout << "Running Stress Tests\n";
     std::cout << "====================\n\n";
     
+    auto overall_start = high_resolution_clock::now();
+    
     try {
+        auto test_start = high_resolution_clock::now();
         test_deeply_nested_structures();
+        auto test_end = high_resolution_clock::now();
+        auto test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_large_schema();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_wide_struct();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_wide_variant();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_wide_enum();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_long_identifiers();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_complex_container_nesting();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_many_circular_refs();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_large_file_parsing();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        test_start = high_resolution_clock::now();
         test_unicode_identifiers();
+        test_end = high_resolution_clock::now();
+        test_duration = duration_cast<milliseconds>(test_end - test_start);
+        std::cout << "  Test completed in " << test_duration.count() << "ms\n\n";
+        
+        auto overall_end = high_resolution_clock::now();
+        auto overall_duration = duration_cast<milliseconds>(overall_end - overall_start);
+        std::cout << "All tests completed in " << overall_duration.count() << "ms\n";
         
         std::cout << "\n✓ All stress tests passed!\n";
         return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "\n✗ Test failed: " << e.what() << "\n";
+        return 1;
     } catch (...) {
         std::cout << "\n✗ Some stress tests failed\n";
         return 1;
